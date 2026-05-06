@@ -7,12 +7,7 @@ Program ini memakai data di memori dengan slice, sehingga cocok untuk belajar da
 ## Cara Menjalankan
 
 1. Buka terminal atau PowerShell.
-2. Masuk ke folder project:
-
-```powershell
-cd "D:\AA_Tugas_Telyu\Semester 2\Alpro\TUBES"
-```
-
+2. Masuk ke folder project
 3. Jalankan program:
 
 ```powershell
@@ -150,8 +145,6 @@ Di balik layar:
 - Difficulty memakai Selection Sort.
 - Reward memakai Insertion Sort.
 
-Kedua algoritma ini memiliki kompleksitas `O(n^2)` dan ditulis manual untuk tujuan pembelajaran.
-
 ## Menu 5: Laporan Mining
 
 Laporan menampilkan:
@@ -164,29 +157,9 @@ Laporan menampilkan:
 
 Jika belum ada simulasi, program akan meminta pengguna menjalankan simulasi mining terlebih dahulu.
 
-## Contoh Alur Cepat
-
-```text
-2
-Bitcoin
-1000
-5
-0
-```
-
-Artinya:
-
-1. Masuk ke simulasi mining.
-2. Pilih Bitcoin.
-3. Masukkan compute power 1000.
-4. Lihat laporan mining.
-5. Keluar.
-
 ## Catatan Penting
 
 - Data hanya tersimpan selama program berjalan.
 - Program tidak memakai database atau file penyimpanan.
 - Input kosong akan ditolak.
-- Nama aset dan algoritma boleh memakai spasi.
-- Program ini sengaja dibuat sederhana dan banyak komentar agar mudah dipelajari.
-
+- Nama aset dan algoritma boleh memakai spasi (sudah pake bufio.Scanner)
