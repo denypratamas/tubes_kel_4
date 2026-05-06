@@ -1,31 +1,27 @@
 # Crypto Mining Simulation
 
-Crypto Mining Simulation adalah aplikasi CLI sederhana yang dibuat dengan Go. Program ini membantu pengguna memahami konsep dasar mining cryptocurrency melalui data aset, simulasi mining, pencarian, pengurutan, dan laporan hasil mining.
+Crypto Mining Simulation adalah aplikasi CLI sederhana berbasis Go untuk latihan CRUD, simulasi mining, searching, sorting, dan laporan hasil mining.
 
-Program ini cocok untuk latihan CRUD pertama karena semua data disimpan di dalam slice dan dijalankan melalui menu terminal.
+Program ini memakai data di memori dengan slice, sehingga cocok untuk belajar dasar pemrograman Go tanpa database.
 
-## Isi Program
-
-Program memiliki fitur utama:
-
-- Mengelola data aset crypto
-- Menandai aset yang ingin ditambang
-- Menjalankan simulasi mining
-- Mencari aset dengan sequential search dan binary search
-- Mengurutkan aset dengan selection sort dan insertion sort
-- Menampilkan laporan hasil mining
-
-## Cara Menjalankan Program
+## Cara Menjalankan
 
 1. Buka terminal atau PowerShell.
 2. Masuk ke folder project:
+
+```powershell
+cd "D:\AA_Tugas_Telyu\Semester 2\Alpro\TUBES"
+```
+
 3. Jalankan program:
 
 ```powershell
 go run crypto_mining.go
 ```
 
-4. Setelah program berjalan, menu utama akan muncul:
+## Menu Utama
+
+Saat program dijalankan, menu berikut akan muncul:
 
 ```text
 === CRYPTO MINING SIMULATION ===
@@ -37,11 +33,11 @@ go run crypto_mining.go
 0. Keluar
 ```
 
-Ketik angka menu yang ingin dipilih, lalu tekan Enter.
+Ketik angka menu yang diinginkan, lalu tekan Enter.
 
 ## Data Awal
 
-Saat program pertama kali dijalankan, data aset crypto sudah diisi otomatis:
+Program langsung menyediakan beberapa aset:
 
 | Aset | Difficulty | Reward | Algoritma | Energi |
 | --- | ---: | ---: | --- | ---: |
@@ -50,252 +46,115 @@ Saat program pertama kali dijalankan, data aset crypto sudah diisi otomatis:
 | Ethereum | 50.00 | 0.020000 | Ethash | 900.00 kWh |
 | Litecoin | 25.00 | 0.120000 | Scrypt | 650.00 kWh |
 
-Status awal semua aset adalah `belum dipilih`, artinya aset belum dipilih untuk simulasi mining.
+Status `belum pernah ditambang` akan berubah menjadi `pernah ditambang` setelah aset disimulasikan.
 
 ## Menu 1: Kelola Aset Kripto
 
-Menu ini digunakan untuk melakukan CRUD dan memilih aset yang akan ditambang.
-
-Pilihan di dalam menu:
+Menu ini khusus untuk CRUD aset.
 
 ```text
 1. Tambah aset baru
 2. Edit aset
 3. Hapus aset
-4. Tandai aset untuk ditambang
-5. Batalkan aset dari daftar tambang
 0. Kembali ke menu utama
 ```
 
-### 1. Tambah Aset Baru
+### Tambah Aset
 
-Gunakan menu ini untuk menambahkan aset crypto baru.
-
-Data yang harus diisi:
+Data yang diminta:
 
 - Nama aset
 - Mining difficulty
 - Estimasi reward
 - Tipe algoritma
-- Estimasi konsumsi energi dalam kWh
+- Estimasi konsumsi energi
+
+Program sudah memakai `bufio.Scanner`, sehingga input string boleh memakai spasi.
+
+Contoh:
+
+```text
+Nama aset: Bitcoin Cash
+Mining difficulty: 20
+Estimasi reward: 0.03
+Tipe algoritma: SHA-256 Variant
+Estimasi konsumsi energi (kWh): 700
+```
+
+### Edit Aset
+
+Pilih nomor aset yang ingin diedit, lalu isi ulang data aset dengan nilai baru.
+
+### Hapus Aset
+
+Pilih nomor aset yang ingin dihapus. Data tersebut akan dihapus dari slice `masterData`.
+
+## Menu 2: Simulasi Mining
+
+Menu ini langsung menjalankan proses mining untuk satu aset.
+
+Alur:
+
+1. Program menampilkan katalog aset.
+2. Masukkan nomor aset atau nama aset.
+3. Masukkan computational power.
+4. Program menampilkan teks `Sedang menambang [Nama Aset]...`.
+5. Program memberi delay dinamis berdasarkan difficulty, algoritma, dan compute power.
+6. Hasil simulasi ditampilkan dan disimpan ke laporan.
 
 Contoh input:
 
 ```text
-Nama aset: Dogecoin
-Mining difficulty: 15
-Estimasi reward: 0.05
-Tipe algoritma: Scrypt
-Estimasi konsumsi energi (kWh): 500
+Masukkan nomor atau nama aset yang ingin ditambang: Bitcoin Cash
+Masukkan computational power pengguna (hashrate): 1000
 ```
 
-Catatan:
-
-- Difficulty, reward, dan energi harus lebih dari 0.
-- Nama aset dan algoritma tidak boleh kosong.
-
-### 2. Edit Aset
-
-Gunakan menu ini untuk mengubah data aset yang sudah ada.
-
-Langkah:
-
-1. Pilih menu `2. Edit aset`.
-2. Masukkan nomor aset yang ingin diedit.
-3. Isi ulang data aset dengan nilai baru.
-
-Program akan mengganti data lama dengan data baru.
-
-### 3. Hapus Aset
-
-Gunakan menu ini untuk menghapus aset dari daftar.
-
-Langkah:
-
-1. Pilih menu `3. Hapus aset`.
-2. Masukkan nomor aset yang ingin dihapus.
-3. Program akan menghapus aset tersebut dari slice `masterData`.
-
-### 4. Tandai Aset Untuk Ditambang
-
-Gunakan menu ini sebelum menjalankan simulasi mining.
-
-Langkah:
-
-1. Pilih menu `4. Tandai aset untuk ditambang`.
-2. Masukkan nomor aset.
-3. Status aset berubah menjadi `dipilih untuk mining`.
-
-Hanya aset dengan status `dipilih untuk mining` yang akan diproses oleh simulasi mining.
-
-### 5. Batalkan Aset Dari Daftar Tambang
-
-Gunakan menu ini jika aset tidak ingin ikut disimulasikan.
-
-Langkah:
-
-1. Pilih menu `5. Batalkan aset dari daftar tambang`.
-2. Masukkan nomor aset.
-3. Status aset kembali menjadi `belum dipilih`.
-
-## Menu 2: Simulasi Mining
-
-Menu ini digunakan untuk menghitung estimasi hasil mining berdasarkan aset yang sudah dipilih.
-
-Langkah penggunaan:
-
-1. Masuk ke `Kelola aset kripto`.
-2. Tandai satu atau beberapa aset untuk ditambang.
-3. Kembali ke menu utama.
-4. Pilih `2. Simulasi mining`.
-5. Masukkan computational power pengguna.
-
-Contoh:
+Rumus utama:
 
 ```text
-Masukkan computational power pengguna (hashrate): 50
-```
-
-Program akan menampilkan:
-
-- Nama aset
-- Algoritma
-- Estimasi durasi mining
-- Computational power yang digunakan
-- Estimasi energi yang digunakan
-- Estimasi reward yang diterima
-
-### Rumus Simulasi
-
-Program menggunakan rumus sederhana:
-
-```text
-duration = difficulty / computingPower
+duration = (difficulty * algoMultiplier) / computingPower
 reward = estimatedReward * (computingPower / (difficulty + 100))
 energyUsed = energyConsumption * duration
+delay = (difficulty * algoMultiplier) / computingPower
 ```
 
-Arti rumus:
-
-- Semakin besar difficulty, durasi mining semakin lama.
-- Semakin besar computational power, durasi mining semakin cepat.
-- Reward dipengaruhi oleh reward awal, difficulty, dan computational power.
-- Energi dihitung dari konsumsi energi aset dikali durasi mining.
-
-Hasil simulasi juga disimpan ke `miningSessions` agar bisa muncul di laporan.
+Delay diskalakan dan dibatasi agar program tetap nyaman dipakai.
 
 ## Menu 3: Cari Aset
 
-Menu ini digunakan untuk mencari aset berdasarkan nama.
-
-Pilihan pencarian:
+Pengguna cukup memasukkan nama aset.
 
 ```text
-1. Sequential search
-2. Binary search
+Masukkan nama aset: Bitcoin Cash
 ```
 
-### Sequential Search
+Di balik layar:
 
-Sequential search mengecek data satu per satu dari awal sampai akhir.
+1. Program menyalin data aset.
+2. Salinan data diurutkan berdasarkan nama.
+3. Program mencari aset dengan Binary Search.
 
-Contoh:
-
-```text
-Pilih metode pencarian: 1
-Masukkan nama aset: Bitcoin
-```
-
-Jika aset ditemukan, program menampilkan detail aset tersebut.
-
-Kompleksitas waktu:
-
-```text
-O(n)
-```
-
-Artinya, semakin banyak data, pencarian bisa semakin lama karena data diperiksa satu per satu.
-
-### Binary Search
-
-Binary search mencari data dengan cara membagi area pencarian menjadi dua bagian.
-
-Syarat penting:
-
-- Binary search hanya benar jika data sudah terurut.
-- Di program ini, data disalin lalu diurutkan berdasarkan nama sebelum binary search dijalankan.
-- Data asli di `masterData` tidak berubah saat binary search.
-
-Kompleksitas waktu:
-
-```text
-O(log n)
-```
-
-Artinya, binary search lebih cepat untuk data besar, tetapi membutuhkan data yang sudah terurut.
+Binary Search membutuhkan data terurut dan memiliki kompleksitas `O(log n)`.
 
 ## Menu 4: Urutkan Aset
 
-Menu ini digunakan untuk mengurutkan data aset.
-
-Pilihan pengurutan:
+Menu ini hanya menampilkan pilihan berdasarkan kebutuhan pengguna, bukan nama algoritma.
 
 ```text
-1. Selection sort berdasarkan difficulty
-2. Selection sort berdasarkan reward
-3. Insertion sort berdasarkan difficulty
-4. Insertion sort berdasarkan reward
+1. Urutkan berdasarkan Difficulty
+2. Urutkan berdasarkan Reward
 ```
 
-### Selection Sort Berdasarkan Difficulty
+Di balik layar:
 
-Mengurutkan aset dari difficulty terkecil ke terbesar.
+- Difficulty memakai Selection Sort.
+- Reward memakai Insertion Sort.
 
-Cara kerja:
-
-1. Cari difficulty paling kecil.
-2. Tukar ke posisi paling depan.
-3. Ulangi untuk posisi berikutnya.
-
-Kompleksitas waktu:
-
-```text
-O(n^2)
-```
-
-### Selection Sort Berdasarkan Reward
-
-Mengurutkan aset dari reward terbesar ke terkecil.
-
-Cara kerja sama seperti selection sort biasa, tetapi pembandingnya adalah `EstimatedReward`.
-
-### Insertion Sort Berdasarkan Difficulty
-
-Mengurutkan aset dari difficulty terkecil ke terbesar.
-
-Cara kerja:
-
-1. Ambil satu data sebagai `key`.
-2. Geser data yang lebih besar ke kanan.
-3. Sisipkan `key` ke posisi yang tepat.
-
-Kompleksitas waktu:
-
-```text
-O(n^2)
-```
-
-### Insertion Sort Berdasarkan Reward
-
-Mengurutkan aset dari reward terbesar ke terkecil.
-
-Cara kerja sama seperti insertion sort biasa, tetapi pembandingnya adalah `EstimatedReward`.
+Kedua algoritma ini memiliki kompleksitas `O(n^2)` dan ditulis manual untuk tujuan pembelajaran.
 
 ## Menu 5: Laporan Mining
 
-Menu ini menampilkan ringkasan semua simulasi mining yang sudah dijalankan.
-
-Isi laporan:
+Laporan menampilkan:
 
 - Total sesi mining
 - Total estimasi reward
@@ -303,78 +162,31 @@ Isi laporan:
 - Total konsumsi energi
 - Aset paling menguntungkan
 
-Jika belum pernah menjalankan simulasi mining, program akan menampilkan pesan:
+Jika belum ada simulasi, program akan meminta pengguna menjalankan simulasi mining terlebih dahulu.
+
+## Contoh Alur Cepat
 
 ```text
-[INFO] Belum ada sesi mining. Jalankan simulasi mining terlebih dahulu.
-```
-
-## Alur Penggunaan Yang Disarankan
-
-Untuk mencoba program dari awal, gunakan urutan ini:
-
-1. Jalankan program dengan `go run crypto_mining.go`.
-2. Pilih menu `1. Kelola aset kripto`.
-3. Tandai aset yang ingin ditambang.
-4. Kembali ke menu utama.
-5. Pilih menu `2. Simulasi mining`.
-6. Masukkan computational power.
-7. Pilih menu `5. Laporan mining`.
-8. Coba menu `3. Cari aset`.
-9. Coba menu `4. Urutkan aset`.
-10. Pilih `0. Keluar` jika sudah selesai.
-
-## Contoh Skenario Singkat
-
-Input:
-
-```text
-1
-4
-1
-0
 2
-50
+Bitcoin
+1000
 5
 0
 ```
 
-Arti input:
+Artinya:
 
-1. Masuk ke menu kelola aset.
-2. Tandai aset untuk ditambang.
-3. Pilih aset nomor 1, yaitu Bitcoin.
-4. Kembali ke menu utama.
-5. Jalankan simulasi mining.
-6. Masukkan computational power 50.
-7. Lihat laporan mining.
-8. Keluar dari program.
+1. Masuk ke simulasi mining.
+2. Pilih Bitcoin.
+3. Masukkan compute power 1000.
+4. Lihat laporan mining.
+5. Keluar.
 
 ## Catatan Penting
 
-- Data hanya disimpan di memori selama program berjalan.
-- Jika program ditutup, data tambahan dan laporan mining akan hilang.
-- Program ini tidak menggunakan database atau file penyimpanan.
-- Input nama aset dan algoritma sebaiknya tidak memakai spasi karena program memakai `fmt.Scanln`.
-- Program dibuat sederhana agar mudah dipahami oleh pemula.
-
-## Struktur File
-
-Project ini hanya memakai satu file Go utama:
-
-```text
-crypto_mining.go
-```
-
-File tersebut berisi:
-
-- Struct `CryptoAsset`
-- Struct `MiningSession`
-- Data awal aset crypto
-- Menu utama
-- Fungsi CRUD aset
-- Fungsi simulasi mining
-- Fungsi searching
-- Fungsi sorting
-- Fungsi laporan mining
+- Data hanya tersimpan selama program berjalan.
+- Program tidak memakai database atau file penyimpanan.
+- Input kosong akan ditolak.
+- Nama aset dan algoritma boleh memakai spasi.
+- Program ini sengaja dibuat sederhana dan banyak komentar agar mudah dipelajari.
 
