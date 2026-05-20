@@ -321,8 +321,6 @@ func menuCariAset() {
 	salinanData := salinData(masterData, jumlahAset)
 	insertionSortByName(&salinanData, jumlahAset)
 
-	// Binary search memiliki kompleksitas O(log n), tetapi hanya benar
-	// jika data sudah terurut. Karena itu data disalin lalu diurutkan dulu.
 	index := binarySearch(salinanData, jumlahAset, keyword)
 	if index == -1 {
 		fmt.Println("\n[INFO] Aset tidak ditemukan.")
@@ -334,8 +332,6 @@ func menuCariAset() {
 }
 
 func sequentialSearch(keyword string) int {
-	// Sequential search mengecek data satu per satu dari awal sampai akhir.
-	// Kompleksitas waktunya O(n) karena pada kasus terburuk semua data dicek.
 	for i := 0; i < jumlahAset; i++ {
 		if samaTanpaHurufBesarKecil(masterData[i].Name, keyword) {
 			return i
@@ -394,8 +390,6 @@ func menuUrutkanAset() {
 }
 
 func selectionSortByDifficulty(data *[NMAX]CryptoAsset, jumlah int) {
-	// Selection sort mencari nilai paling kecil, lalu menukarnya ke posisi awal.
-	// Proses ini diulang untuk setiap posisi. Kompleksitas waktunya O(n^2).
 	for i := 0; i < jumlah-1; i++ {
 		minIndex := i
 		for j := i + 1; j < jumlah; j++ {
@@ -408,9 +402,6 @@ func selectionSortByDifficulty(data *[NMAX]CryptoAsset, jumlah int) {
 }
 
 func insertionSortByReward(data *[NMAX]CryptoAsset, jumlah int) {
-	// Insertion sort menyisipkan data ke posisi yang tepat pada bagian kiri
-	// data yang sudah dianggap terurut. Di sini reward terbesar ditempatkan dulu.
-	// Kompleksitas waktunya O(n^2).
 	for i := 1; i < jumlah; i++ {
 		key := data[i]
 		j := i - 1

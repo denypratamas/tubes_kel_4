@@ -1,19 +1,33 @@
 FUNCTION EXPLANATION - CRYPTO MINING SIMULATION
 ================================================
 
-File ini menjelaskan setiap function yang ada di crypto_mining.go.
-Urutan penjelasan mengikuti urutan function di dalam kode agar mudah dipelajari.
+File ini menjelaskan function yang ada di crypto_mining.go.
+Penjelasan ini sudah disesuaikan dengan kondisi kode terbaru:
+- Input hanya memakai fmt.
+- Data memakai array statis dengan const NMAX = 100.
+- Tidak memakai slice, append, make, bufio, os, atau strconv.
+- Konversi angka dilakukan manual dengan stringKeInt() dan stringKeFloat().
+
+
+DATA GLOBAL
+-----------
+- NMAX: kapasitas maksimal data aset dan sesi mining.
+- masterData [NMAX]CryptoAsset: array utama untuk menyimpan aset crypto.
+- miningSessions [NMAX]MiningSession: array untuk menyimpan riwayat simulasi mining.
+- jumlahAset int: jumlah aset aktif yang terisi di masterData.
+- jumlahMiningSessions int: jumlah sesi aktif yang terisi di miningSessions.
+- computingPower float64: nilai computational power terakhir yang dimasukkan user.
 
 
 1. initData()
 -------------
 Tujuan:
-Mengisi data awal aset crypto ke dalam slice global masterData.
+Mengisi data awal aset crypto ke dalam array global masterData.
 
 Cara kerja:
-- Membuat beberapa data CryptoAsset bawaan.
-- Data awalnya adalah Bitcoin, Zcash, Ethereum, dan Litecoin.
+- Mengisi masterData index 0 sampai 3 dengan Bitcoin, Zcash, Ethereum, dan Litecoin.
 - Setiap aset memiliki nama, difficulty, estimasi reward, algoritma, konsumsi energi, dan status Mined.
+- Mengatur jumlahAset menjadi 4.
 
 Input:
 Tidak ada parameter.
@@ -22,7 +36,7 @@ Output:
 Tidak mengembalikan nilai.
 
 Efek:
-Mengubah isi variabel global masterData.
+Mengubah isi masterData dan jumlahAset.
 
 
 2. main()
@@ -31,17 +45,11 @@ Tujuan:
 Menjadi titik awal program saat dijalankan.
 
 Cara kerja:
-- Memanggil initData() untuk menyiapkan data awal.
+- Memanggil initData().
 - Menampilkan menu utama secara berulang.
 - Membaca pilihan user dengan bacaInt().
 - Mengarahkan user ke menu sesuai pilihan.
 - Program berhenti jika user memilih 0.
-
-Input:
-Tidak ada parameter.
-
-Output:
-Tidak mengembalikan nilai.
 
 Efek:
 Menjalankan seluruh alur aplikasi CLI.
@@ -57,31 +65,19 @@ Cara kerja:
 - Menampilkan pilihan tambah, edit, hapus, atau kembali.
 - Memanggil tambahAset(), editAset(), atau hapusAset() sesuai pilihan user.
 
-Input:
-Tidak ada parameter.
-
-Output:
-Tidak mengembalikan nilai.
-
 Efek:
-Dapat mengubah isi masterData melalui tambah, edit, atau hapus aset.
+Dapat mengubah isi masterData dan jumlahAset.
 
 
 4. tampilkanSemuaAset()
 -----------------------
 Tujuan:
-Menampilkan semua aset crypto yang ada di masterData.
+Menampilkan semua aset crypto yang aktif.
 
 Cara kerja:
-- Jika masterData kosong, tampilkan pesan bahwa belum ada aset.
-- Jika ada data, lakukan loop untuk setiap aset.
+- Jika jumlahAset bernilai 0, tampilkan pesan bahwa belum ada aset.
+- Jika ada data, loop dari index 0 sampai jumlahAset - 1.
 - Untuk setiap aset, panggil tampilkanRingkasanAset().
-
-Input:
-Tidak ada parameter.
-
-Output:
-Tidak mengembalikan nilai.
 
 Efek:
 Menampilkan data aset ke layar.
@@ -92,18 +88,13 @@ Menampilkan data aset ke layar.
 Tujuan:
 Menampilkan satu baris ringkasan data aset.
 
-Cara kerja:
-- Mengecek status aset berdasarkan field Mined.
-- Jika Mined true, status menjadi "pernah ditambang".
-- Jika Mined false, status menjadi "belum pernah ditambang".
-- Menampilkan nomor, nama, difficulty, reward, algoritma, energi, dan status.
-
 Input:
-- index int: posisi aset di slice.
+- index int: posisi aset yang sedang ditampilkan.
 - aset CryptoAsset: data aset yang ingin ditampilkan.
 
-Output:
-Tidak mengembalikan nilai.
+Cara kerja:
+- Mengecek field Mined.
+- Menampilkan nomor, nama, difficulty, reward, algoritma, energi, dan status mining.
 
 Efek:
 Menampilkan satu aset ke layar.
@@ -115,20 +106,15 @@ Tujuan:
 Menambahkan aset crypto baru ke masterData.
 
 Cara kerja:
+- Mengecek apakah jumlahAset sudah mencapai NMAX.
 - Meminta input nama aset, difficulty, reward, algoritma, dan energi.
-- Input string dibaca dengan bacaStringWajib() agar boleh memakai spasi.
-- Input angka dibaca dengan bacaFloatPositif() agar harus lebih dari 0.
-- Membuat struct CryptoAsset baru.
-- Menambahkan aset baru ke masterData dengan append().
-
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
+- Input string dibaca dengan bacaStringWajib().
+- Input angka dibaca dengan bacaFloatPositif().
+- Menyimpan data baru ke masterData[jumlahAset].
+- Menambah jumlahAset sebanyak 1.
 
 Efek:
-Menambah data baru ke masterData.
+Menambah satu data aset jika array belum penuh.
 
 
 7. editAset()
@@ -137,18 +123,12 @@ Tujuan:
 Mengubah data aset yang sudah ada.
 
 Cara kerja:
-- Mengecek apakah masterData kosong.
+- Mengecek apakah jumlahAset bernilai 0.
 - Meminta nomor aset yang ingin diedit.
-- Mengubah nomor menjadi index slice dengan rumus nomor - 1.
+- Mengubah nomor menjadi index dengan rumus nomor - 1.
 - Memvalidasi index dengan validasiIndex().
 - Meminta data baru dari user.
-- Mengganti aset lama dengan aset baru.
-
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
+- Mengganti data pada masterData[index].
 
 Efek:
 Mengubah salah satu data di masterData.
@@ -160,40 +140,29 @@ Tujuan:
 Menghapus aset dari masterData.
 
 Cara kerja:
-- Mengecek apakah masterData kosong.
+- Mengecek apakah jumlahAset bernilai 0.
 - Meminta nomor aset yang ingin dihapus.
 - Mengubah nomor menjadi index.
 - Memvalidasi index.
-- Menghapus data dari slice dengan append(masterData[:index], masterData[index+1:]...).
-
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
+- Menggeser semua data setelah index satu posisi ke kiri.
+- Mengosongkan elemen terakhir yang sebelumnya aktif.
+- Mengurangi jumlahAset sebanyak 1.
 
 Efek:
-Menghapus salah satu data dari masterData.
+Menghapus satu data aset dari array aktif.
 
 
 9. validasiIndex(index int) bool
 --------------------------------
 Tujuan:
-Memastikan index berada dalam batas slice masterData.
+Memastikan index berada dalam batas data aktif masterData.
 
 Cara kerja:
-- Jika index kurang dari 0, berarti tidak valid.
-- Jika index lebih besar atau sama dengan len(masterData), berarti tidak valid.
-- Jika index berada dalam range slice, berarti valid.
-
-Input:
-- index int: index yang ingin dicek.
+- Index valid jika index >= 0 dan index < jumlahAset.
+- Jika tidak valid, tampilkan pesan error.
 
 Output:
 - bool: true jika valid, false jika tidak valid.
-
-Efek:
-Menampilkan pesan error jika index tidak valid.
 
 
 10. simulasiMining()
@@ -202,31 +171,20 @@ Tujuan:
 Menjalankan simulasi mining untuk satu aset pilihan user.
 
 Cara kerja:
-- Mengecek apakah masterData kosong.
+- Mengecek apakah jumlahAset bernilai 0.
+- Mengecek apakah jumlahMiningSessions sudah mencapai NMAX.
 - Menampilkan katalog aset.
 - Meminta user memilih aset berdasarkan nomor atau nama.
 - Meminta computational power.
-- Menghitung multiplier algoritma dengan hitungAlgoMultiplier().
-- Menghitung estimasi durasi mining.
-- Menghitung estimasi reward.
-- Menghitung estimasi energi.
-- Menghitung delay mining dengan hitungDelayMining().
-- Menampilkan pesan "Sedang menambang ...".
-- Menjalankan time.Sleep(delay) agar simulasi terasa realistis.
-- Menyimpan hasil ke miningSessions.
+- Menghitung multiplier algoritma, durasi, reward, energi, dan delay.
+- Menjalankan time.Sleep(delay).
+- Menyimpan hasil ke miningSessions[jumlahMiningSessions].
+- Menambah jumlahMiningSessions sebanyak 1.
 - Mengubah status aset menjadi pernah ditambang.
 - Menampilkan hasil simulasi.
 
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
-
 Efek:
-- Menambah data ke miningSessions.
-- Mengubah field Mined pada aset yang disimulasikan.
-- Menampilkan hasil simulasi ke layar.
+Menambah riwayat mining dan mengubah field Mined pada aset.
 
 
 11. pilihAsetUntukMining() int
@@ -236,19 +194,13 @@ Membaca pilihan aset dari user untuk simulasi mining.
 
 Cara kerja:
 - Meminta user memasukkan nomor atau nama aset.
-- Mencoba mengubah input menjadi angka dengan strconv.Atoi().
+- Mencoba mengubah input menjadi angka dengan stringKeInt().
 - Jika input angka, angka diubah menjadi index.
 - Jika input bukan angka, program mencari aset berdasarkan nama dengan sequentialSearch().
-
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
 
 Output:
 - int: index aset yang dipilih.
 - Mengembalikan -1 jika aset tidak ditemukan.
-
-Efek:
-Dapat menampilkan pesan error jika nomor aset tidak valid.
 
 
 12. hitungAlgoMultiplier(algorithm string) float64
@@ -257,20 +209,12 @@ Tujuan:
 Memberikan nilai multiplier berdasarkan jenis algoritma mining.
 
 Cara kerja:
-- Mengubah nama algoritma menjadi huruf kecil.
-- Mencocokkan algoritma dengan beberapa case:
-  sha-256, ethash, scrypt, equihash.
-- Mengembalikan multiplier yang berbeda untuk setiap algoritma.
-- Jika algoritma tidak dikenali, multiplier default adalah 1.0.
-
-Input:
-- algorithm string: nama algoritma aset.
+- Mengubah nama algoritma menjadi huruf kecil dengan ubahKeHurufKecil().
+- Mencocokkan algoritma dengan sha-256, ethash, scrypt, atau equihash.
+- Mengembalikan multiplier default 1.0 jika algoritma tidak dikenali.
 
 Output:
 - float64: multiplier algoritma.
-
-Efek:
-Tidak mengubah data apa pun.
 
 
 13. hitungDelayMining(aset CryptoAsset, power float64, algoMultiplier float64) time.Duration
@@ -279,23 +223,13 @@ Tujuan:
 Menghitung delay buatan untuk simulasi mining.
 
 Cara kerja:
-- Menghitung rawDelay dengan rumus:
-  (aset.Difficulty * algoMultiplier) / power
-- Mengalikan rawDelay dengan 1.5 agar delay lebih terasa.
-- Membatasi delay minimal 1 detik.
-- Membatasi delay maksimal 7 detik.
-- Mengubah hasilnya menjadi time.Duration.
-
-Input:
-- aset CryptoAsset: aset yang sedang ditambang.
-- power float64: computational power user.
-- algoMultiplier float64: multiplier algoritma.
+- rawDelay = (aset.Difficulty * algoMultiplier) / power.
+- rawDelay dikali 1.5.
+- Delay dibatasi minimal 1 detik dan maksimal 7 detik.
+- Hasil dikonversi menjadi time.Duration.
 
 Output:
 - time.Duration: durasi delay untuk time.Sleep().
-
-Efek:
-Tidak mengubah data apa pun.
 
 
 14. menuCariAset()
@@ -304,22 +238,15 @@ Tujuan:
 Menjalankan fitur pencarian aset berdasarkan nama.
 
 Cara kerja:
-- Mengecek apakah masterData kosong.
+- Mengecek apakah jumlahAset bernilai 0.
 - Meminta nama aset dari user.
 - Menyalin masterData dengan salinData().
 - Mengurutkan salinan data berdasarkan nama dengan insertionSortByName().
 - Mencari aset dengan binarySearch().
 - Menampilkan hasil jika ditemukan.
 
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
-
 Efek:
-Menampilkan hasil pencarian ke layar.
-Data asli masterData tidak berubah karena pencarian memakai salinan data.
+Menampilkan hasil pencarian. Data asli masterData tidak berubah.
 
 
 15. sequentialSearch(keyword string) int
@@ -328,31 +255,27 @@ Tujuan:
 Mencari aset berdasarkan nama dengan cara mengecek satu per satu.
 
 Cara kerja:
-- Melakukan loop pada masterData.
-- Membandingkan nama aset dengan keyword menggunakan samaTanpaHurufBesarKecil().
-- Jika ditemukan, mengembalikan index aset.
-- Jika tidak ditemukan, mengembalikan -1.
-
-Input:
-- keyword string: nama aset yang dicari.
-
-Output:
-- int: index aset jika ditemukan, -1 jika tidak ditemukan.
-
-Efek:
-Tidak mengubah data apa pun.
+- Loop dari index 0 sampai jumlahAset - 1.
+- Membandingkan nama aset dengan keyword memakai samaTanpaHurufBesarKecil().
+- Mengembalikan index jika ditemukan.
+- Mengembalikan -1 jika tidak ditemukan.
 
 Catatan:
 Sequential search memiliki kompleksitas O(n).
 
 
-16. binarySearch(data []CryptoAsset, keyword string) int
---------------------------------------------------------
+16. binarySearch(data [NMAX]CryptoAsset, jumlah int, keyword string) int
+------------------------------------------------------------------------
 Tujuan:
 Mencari aset berdasarkan nama dengan Binary Search.
 
+Input:
+- data [NMAX]CryptoAsset: array aset yang sudah terurut berdasarkan nama.
+- jumlah int: jumlah elemen aktif yang perlu diproses.
+- keyword string: nama aset yang dicari.
+
 Cara kerja:
-- Menentukan batas kiri dan kanan.
+- Menentukan batas kiri dan kanan berdasarkan jumlah.
 - Mengambil index tengah.
 - Membandingkan keyword dengan nama aset di tengah.
 - Jika sama, index tengah dikembalikan.
@@ -360,18 +283,8 @@ Cara kerja:
 - Jika keyword lebih kecil, pencarian dilanjutkan ke kiri.
 - Jika tidak ditemukan, mengembalikan -1.
 
-Input:
-- data []CryptoAsset: data aset yang sudah terurut berdasarkan nama.
-- keyword string: nama aset yang dicari.
-
-Output:
-- int: index aset pada data yang dikirim, -1 jika tidak ditemukan.
-
-Efek:
-Tidak mengubah data apa pun.
-
 Catatan:
-Binary search harus memakai data yang sudah terurut.
+Binary Search harus memakai data yang sudah terurut.
 Kompleksitasnya O(log n).
 
 
@@ -381,74 +294,56 @@ Tujuan:
 Menjalankan fitur pengurutan aset.
 
 Cara kerja:
-- Mengecek apakah masterData kosong.
-- Menampilkan dua pilihan pengurutan:
-  1. Berdasarkan Difficulty.
-  2. Berdasarkan Reward.
-- Jika user memilih Difficulty, program memanggil selectionSortByDifficulty().
-- Jika user memilih Reward, program memanggil insertionSortByReward().
+- Mengecek apakah jumlahAset bernilai 0.
+- Menampilkan pilihan pengurutan berdasarkan difficulty atau reward.
+- Difficulty memanggil selectionSortByDifficulty(&masterData, jumlahAset).
+- Reward memanggil insertionSortByReward(&masterData, jumlahAset).
 - Menampilkan data setelah diurutkan.
 
-Input:
-Tidak ada parameter, tetapi membaca input dari user.
-
-Output:
-Tidak mengembalikan nilai.
-
 Efek:
-Mengubah urutan data di masterData.
+Mengubah urutan data aktif di masterData.
 
 
-18. selectionSortByDifficulty(data []CryptoAsset)
--------------------------------------------------
+18. selectionSortByDifficulty(data *[NMAX]CryptoAsset, jumlah int)
+------------------------------------------------------------------
 Tujuan:
 Mengurutkan aset berdasarkan difficulty dari kecil ke besar.
 
+Input:
+- data *[NMAX]CryptoAsset: pointer ke array aset yang ingin diurutkan.
+- jumlah int: jumlah elemen aktif.
+
 Cara kerja:
 - Mulai dari posisi pertama.
-- Cari aset dengan difficulty terkecil di sisa data.
+- Cari aset dengan difficulty terkecil di sisa data aktif.
 - Tukar aset terkecil ke posisi saat ini.
 - Ulangi sampai data terurut.
 
-Input:
-- data []CryptoAsset: slice aset yang ingin diurutkan.
-
-Output:
-Tidak mengembalikan nilai.
-
-Efek:
-Mengubah urutan slice yang dikirim.
-
 Catatan:
-Selection sort memiliki kompleksitas O(n^2).
+Selection Sort memiliki kompleksitas O(n^2).
 
 
-19. insertionSortByReward(data []CryptoAsset)
----------------------------------------------
+19. insertionSortByReward(data *[NMAX]CryptoAsset, jumlah int)
+--------------------------------------------------------------
 Tujuan:
 Mengurutkan aset berdasarkan estimated reward dari besar ke kecil.
 
+Input:
+- data *[NMAX]CryptoAsset: pointer ke array aset yang ingin diurutkan.
+- jumlah int: jumlah elemen aktif.
+
 Cara kerja:
-- Menganggap bagian kiri slice sudah terurut.
+- Menganggap bagian kiri array sudah terurut.
 - Mengambil satu data sebagai key.
 - Menggeser data dengan reward lebih kecil ke kanan.
 - Menyisipkan key ke posisi yang benar.
 
-Input:
-- data []CryptoAsset: slice aset yang ingin diurutkan.
-
-Output:
-Tidak mengembalikan nilai.
-
-Efek:
-Mengubah urutan slice yang dikirim.
-
 Catatan:
-Insertion sort memiliki kompleksitas O(n^2).
+Insertion Sort memiliki kompleksitas O(n^2).
 
 
-20. insertionSortByName(data []CryptoAsset)
--------------------------------------------
+20. insertionSortByName(data *[NMAX]CryptoAsset, jumlah int)
+------------------------------------------------------------
 Tujuan:
 Mengurutkan aset berdasarkan nama dari A ke Z.
 
@@ -458,34 +353,20 @@ Cara kerja:
 - Menggeser data yang namanya lebih besar secara alfabetis.
 - Menyisipkan data ke posisi yang tepat.
 
-Input:
-- data []CryptoAsset: slice aset yang ingin diurutkan.
-
-Output:
-Tidak mengembalikan nilai.
-
-Efek:
-Mengubah urutan slice yang dikirim.
-
 Catatan:
 Function ini dipakai sebelum binarySearch().
 
 
-21. salinData(data []CryptoAsset) []CryptoAsset
-------------------------------------------------
+21. salinData(data [NMAX]CryptoAsset, jumlah int) [NMAX]CryptoAsset
+-------------------------------------------------------------------
 Tujuan:
-Membuat salinan slice aset.
+Membuat salinan array aset.
 
 Cara kerja:
-- Membuat slice baru dengan panjang yang sama.
-- Menyalin isi data lama ke slice baru menggunakan copy().
-- Mengembalikan slice hasil salinan.
-
-Input:
-- data []CryptoAsset: data yang ingin disalin.
-
-Output:
-- []CryptoAsset: slice baru berisi data yang sama.
+- Membuat variabel lokal hasil bertipe [NMAX]CryptoAsset.
+- Loop dari index 0 sampai jumlah - 1.
+- Menyalin setiap elemen aktif dari data ke hasil.
+- Mengembalikan array hasil salinan.
 
 Efek:
 Tidak mengubah data asli.
@@ -494,22 +375,17 @@ Tidak mengubah data asli.
 22. bacaString(prompt string) string
 ------------------------------------
 Tujuan:
-Membaca input teks dari user.
+Membaca input teks dari user hanya dengan fmt.
 
 Cara kerja:
 - Menampilkan prompt ke layar.
-- Membaca satu baris input dengan inputScanner.Scan().
-- Jika gagal membaca input, mengembalikan string kosong.
-- Jika berhasil, input dipotong spasi awal dan akhir dengan trimSpasi().
+- Membaca input per karakter memakai fmt.Scanf("%c", &karakter).
+- Berhenti saat menemukan newline.
+- Mengabaikan carriage return.
+- Merapikan input dengan trimSpasi().
 
-Input:
-- prompt string: teks pertanyaan yang ditampilkan ke user.
-
-Output:
-- string: input user yang sudah dirapikan.
-
-Efek:
-Membaca input dari terminal.
+Catatan:
+Karena membaca per karakter, input seperti "Bitcoin Cash" tetap bisa dibaca sebagai satu string.
 
 
 23. bacaStringWajib(prompt string) string
@@ -521,16 +397,6 @@ Cara kerja:
 - Memanggil bacaString().
 - Jika input kosong, tampilkan error.
 - Ulangi sampai user memasukkan teks yang valid.
-- Mengembalikan input yang sudah tidak kosong.
-
-Input:
-- prompt string: teks pertanyaan yang ditampilkan ke user.
-
-Output:
-- string: input user yang valid.
-
-Efek:
-Membaca input dari terminal dan bisa mengulang prompt.
 
 
 24. bacaInt(prompt string) int
@@ -540,18 +406,9 @@ Membaca input angka bulat dari user.
 
 Cara kerja:
 - Membaca input dengan bacaStringWajib().
-- Mengubah input menjadi int menggunakan strconv.Atoi().
+- Mengubah input menjadi int memakai stringKeInt().
 - Jika berhasil, nilai dikembalikan.
 - Jika gagal, tampilkan error dan ulangi input.
-
-Input:
-- prompt string: teks pertanyaan yang ditampilkan ke user.
-
-Output:
-- int: angka bulat dari user.
-
-Efek:
-Membaca input dari terminal dan bisa mengulang prompt.
 
 
 25. bacaFloatPositif(prompt string) float64
@@ -561,22 +418,47 @@ Membaca input angka desimal positif dari user.
 
 Cara kerja:
 - Membaca input dengan bacaStringWajib().
-- Mengubah input menjadi float64 menggunakan strconv.ParseFloat().
+- Mengubah input menjadi float64 memakai stringKeFloat().
 - Memastikan angka lebih dari 0.
 - Jika input valid, nilai dikembalikan.
 - Jika input tidak valid, tampilkan error dan ulangi input.
 
-Input:
-- prompt string: teks pertanyaan yang ditampilkan ke user.
+
+26. stringKeInt(teks string) (int, bool)
+----------------------------------------
+Tujuan:
+Mengubah string menjadi int tanpa strconv.
+
+Cara kerja:
+- Membersihkan spasi awal dan akhir.
+- Mengecek tanda minus atau plus di awal.
+- Memastikan semua karakter berikutnya adalah angka 0 sampai 9.
+- Menghitung nilai integer secara manual.
+- Mengembalikan nilai dan status keberhasilan.
 
 Output:
-- float64: angka positif dari user.
-
-Efek:
-Membaca input dari terminal dan bisa mengulang prompt.
+- int: hasil konversi.
+- bool: true jika konversi berhasil, false jika gagal.
 
 
-26. trimSpasi(teks string) string
+27. stringKeFloat(teks string) (float64, bool)
+----------------------------------------------
+Tujuan:
+Mengubah string menjadi float64 tanpa strconv.
+
+Cara kerja:
+- Membersihkan spasi awal dan akhir.
+- Mengecek tanda minus atau plus di awal.
+- Membaca angka sebelum dan sesudah titik desimal.
+- Menolak input yang punya lebih dari satu titik desimal.
+- Mengembalikan nilai dan status keberhasilan.
+
+Output:
+- float64: hasil konversi.
+- bool: true jika konversi berhasil, false jika gagal.
+
+
+28. trimSpasi(teks string) string
 ---------------------------------
 Tujuan:
 Menghapus spasi di awal dan akhir teks.
@@ -587,17 +469,8 @@ Cara kerja:
 - Mengembalikan potongan teks dari awal sampai akhir.
 - Jika teks hanya berisi spasi, mengembalikan string kosong.
 
-Input:
-- teks string: teks yang ingin dibersihkan.
 
-Output:
-- string: teks tanpa spasi awal dan akhir.
-
-Efek:
-Tidak mengubah data apa pun.
-
-
-27. teksKosong(teks string) bool
+29. teksKosong(teks string) bool
 --------------------------------
 Tujuan:
 Mengecek apakah teks kosong atau hanya berisi spasi.
@@ -606,37 +479,18 @@ Cara kerja:
 - Memanggil trimSpasi(teks).
 - Jika hasilnya string kosong, berarti teks kosong.
 
-Input:
-- teks string: teks yang ingin dicek.
 
-Output:
-- bool: true jika kosong, false jika berisi teks.
-
-Efek:
-Tidak mengubah data apa pun.
-
-
-28. karakterSpasi(karakter byte) bool
+30. karakterSpasi(karakter byte) bool
 -------------------------------------
 Tujuan:
 Mengecek apakah satu karakter termasuk spasi.
 
 Cara kerja:
-- Mengembalikan true jika karakter adalah:
-  spasi, tab, newline, atau carriage return.
+- Mengembalikan true jika karakter adalah spasi, tab, newline, atau carriage return.
 - Jika bukan salah satu dari itu, mengembalikan false.
 
-Input:
-- karakter byte: karakter yang ingin dicek.
 
-Output:
-- bool: true jika karakter adalah spasi, false jika bukan.
-
-Efek:
-Tidak mengubah data apa pun.
-
-
-29. samaTanpaHurufBesarKecil(teks1 string, teks2 string) bool
+31. samaTanpaHurufBesarKecil(teks1 string, teks2 string) bool
 -------------------------------------------------------------
 Tujuan:
 Membandingkan dua teks tanpa memperhatikan huruf besar dan kecil.
@@ -646,61 +500,34 @@ Cara kerja:
 - Mengubah kedua teks menjadi huruf kecil dengan ubahKeHurufKecil().
 - Membandingkan kedua hasilnya.
 
-Input:
-- teks1 string: teks pertama.
-- teks2 string: teks kedua.
 
-Output:
-- bool: true jika kedua teks sama, false jika berbeda.
-
-Efek:
-Tidak mengubah data apa pun.
-
-
-30. ubahKeHurufKecil(teks string) string
+32. ubahKeHurufKecil(teks string) string
 ----------------------------------------
 Tujuan:
 Mengubah huruf kapital A-Z menjadi huruf kecil.
 
 Cara kerja:
-- Mengubah string menjadi slice rune.
-- Melakukan loop untuk setiap huruf.
-- Jika huruf berada di antara A sampai Z, huruf ditambah 32.
-- Dalam kode ASCII, menambah 32 mengubah huruf kapital menjadi huruf kecil.
-- Mengembalikan string hasil perubahan.
-
-Input:
-- teks string: teks yang ingin diubah.
-
-Output:
-- string: teks dengan huruf kapital ASCII berubah menjadi huruf kecil.
-
-Efek:
-Tidak mengubah data asli.
+- Membaca string dari index 0 sampai akhir.
+- Jika karakter berada di antara A sampai Z, karakter ditambah 32.
+- Hasil disusun kembali sebagai string baru.
 
 Catatan:
-Function ini sederhana dan cocok untuk pembelajaran dasar.
+Function ini memakai operasi ASCII sederhana dan tidak memakai slice rune.
 
 
-31. tampilkanLaporan()
+33. tampilkanLaporan()
 ----------------------
 Tujuan:
 Menampilkan laporan hasil semua sesi mining.
 
 Cara kerja:
-- Mengecek apakah miningSessions kosong.
+- Mengecek apakah jumlahMiningSessions bernilai 0.
 - Jika kosong, tampilkan pesan agar user menjalankan simulasi dulu.
-- Jika ada data, hitung total reward, total durasi, dan total energi.
+- Loop dari index 0 sampai jumlahMiningSessions - 1.
+- Menghitung total reward, total durasi, dan total energi.
 - Mencari sesi dengan reward terbesar sebagai aset paling menguntungkan.
 - Menghitung rata-rata durasi.
 - Menampilkan semua hasil laporan ke layar.
 
-Input:
-Tidak ada parameter.
-
-Output:
-Tidak mengembalikan nilai.
-
 Efek:
 Menampilkan laporan mining ke layar.
-

@@ -2,7 +2,7 @@
 
 Crypto Mining Simulation adalah aplikasi CLI sederhana berbasis Go untuk latihan CRUD, simulasi mining, searching, sorting, dan laporan hasil mining.
 
-Program ini memakai data di memori dengan slice, sehingga cocok untuk belajar dasar pemrograman Go tanpa database.
+Program ini memakai data di memori dengan array statis `[NMAX]`, sehingga cocok untuk belajar dasar pemrograman Go tanpa database, slice, `append`, atau `strconv`.
 
 ## Cara Menjalankan
 
@@ -64,7 +64,7 @@ Data yang diminta:
 - Tipe algoritma
 - Estimasi konsumsi energi
 
-Program sudah memakai `bufio.Scanner`, sehingga input string boleh memakai spasi.
+Program hanya memakai package `fmt` untuk input. Input string dibaca per karakter dengan `fmt.Scanf("%c", ...)`, sehingga nama aset dan algoritma tetap boleh memakai spasi.
 
 Contoh:
 
@@ -82,7 +82,7 @@ Pilih nomor aset yang ingin diedit, lalu isi ulang data aset dengan nilai baru.
 
 ### Hapus Aset
 
-Pilih nomor aset yang ingin dihapus. Data tersebut akan dihapus dari slice `masterData`.
+Pilih nomor aset yang ingin dihapus. Data setelah index tersebut akan digeser satu posisi ke kiri di array `masterData`, lalu jumlah data `jumlahAset` dikurangi.
 
 ## Menu 2: Simulasi Mining
 
@@ -130,6 +130,7 @@ Di balik layar:
 3. Program mencari aset dengan Binary Search.
 
 Binary Search membutuhkan data terurut dan memiliki kompleksitas `O(log n)`.
+Salinan data tetap memakai array statis `[NMAX]`, bukan slice.
 
 ## Menu 4: Urutkan Aset
 
@@ -144,6 +145,8 @@ Di balik layar:
 
 - Difficulty memakai Selection Sort.
 - Reward memakai Insertion Sort.
+
+Sorting dilakukan pada array `masterData` dengan bantuan penghitung `jumlahAset`, jadi hanya elemen yang terisi yang diproses.
 
 ## Menu 5: Laporan Mining
 
@@ -161,5 +164,10 @@ Jika belum ada simulasi, program akan meminta pengguna menjalankan simulasi mini
 
 - Data hanya tersimpan selama program berjalan.
 - Program tidak memakai database atau file penyimpanan.
+- Kapasitas data dibatasi oleh `const NMAX = 100`.
+- Data aset disimpan di `masterData [NMAX]CryptoAsset`.
+- Riwayat mining disimpan di `miningSessions [NMAX]MiningSession`.
+- Jumlah data aktif dicatat dengan `jumlahAset` dan `jumlahMiningSessions`.
 - Input kosong akan ditolak.
-- Nama aset dan algoritma boleh memakai spasi (sudah pake bufio.Scanner)
+- Nama aset dan algoritma boleh memakai spasi.
+- Konversi angka tidak memakai `strconv`; program memakai function manual `stringKeInt()` dan `stringKeFloat()`.
