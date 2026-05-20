@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
 )
+
+const NMAX = 100
 
 type CryptoAsset struct {
 	Name              string
@@ -25,18 +24,18 @@ type MiningSession struct {
 	ComputingPowerUsed float64
 }
 
-var masterData []CryptoAsset // inisialisasi slice
-var miningSessions []MiningSession
+var masterData [NMAX]CryptoAsset
+var miningSessions [NMAX]MiningSession
+var jumlahAset int
+var jumlahMiningSessions int
 var computingPower float64
-var inputScanner = bufio.NewScanner(os.Stdin)
 
 func initData() {
-	masterData = []CryptoAsset{
-		{"Bitcoin", 100.0, 0.005, "SHA-256", 1500.0, false},
-		{"Zcash", 10.0, 0.08, "Equihash", 450.0, false},
-		{"Ethereum", 50.0, 0.02, "Ethash", 900.0, false},
-		{"Litecoin", 25.0, 0.12, "Scrypt", 650.0, false},
-	}
+	masterData[0] = CryptoAsset{"Bitcoin", 100.0, 0.005, "SHA-256", 1500.0, false}
+	masterData[1] = CryptoAsset{"Zcash", 10.0, 0.08, "Equihash", 450.0, false}
+	masterData[2] = CryptoAsset{"Ethereum", 50.0, 0.02, "Ethash", 900.0, false}
+	masterData[3] = CryptoAsset{"Litecoin", 25.0, 0.12, "Scrypt", 650.0, false}
+	jumlahAset = 4
 }
 
 func main() {
@@ -100,14 +99,14 @@ func kelolaAset() {
 }
 
 func tampilkanSemuaAset() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\nBelum ada aset kripto.")
 		return
 	}
 
 	fmt.Println("\n--- DAFTAR ASET KRIPTO ---")
-	for i, aset := range masterData {
-		tampilkanRingkasanAset(i, aset)
+	for i := 0; i < jumlahAset; i++ {
+		tampilkanRingkasanAset(i, masterData[i])
 	}
 }
 
@@ -129,6 +128,11 @@ func tampilkanRingkasanAset(index int, aset CryptoAsset) {
 }
 
 func tambahAset() {
+	if jumlahAset >= NMAX {
+		fmt.Println("\n[ERROR] Data aset sudah penuh.")
+		return
+	}
+
 	fmt.Println("\n--- TAMBAH ASET BARU ---")
 
 	aset := CryptoAsset{
@@ -140,12 +144,13 @@ func tambahAset() {
 		Mined:             false,
 	}
 
-	masterData = append(masterData, aset)
+	masterData[jumlahAset] = aset
+	jumlahAset++
 	fmt.Printf("\n[SUKSES] Aset %s berhasil ditambahkan.\n", aset.Name)
 }
 
 func editAset() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\n[ERROR] Belum ada aset yang bisa diedit.")
 		return
 	}
@@ -169,7 +174,7 @@ func editAset() {
 }
 
 func hapusAset() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\n[ERROR] Belum ada aset yang bisa dihapus.")
 		return
 	}
@@ -181,12 +186,16 @@ func hapusAset() {
 	}
 
 	namaAset := masterData[index].Name
-	masterData = append(masterData[:index], masterData[index+1:]...)
+	for i := index; i < jumlahAset-1; i++ {
+		masterData[i] = masterData[i+1]
+	}
+	masterData[jumlahAset-1] = CryptoAsset{}
+	jumlahAset--
 	fmt.Printf("\n[SUKSES] Aset %s berhasil dihapus.\n", namaAset)
 }
 
 func validasiIndex(index int) bool {
-	if index < 0 || index >= len(masterData) {
+	if index < 0 || index >= jumlahAset {
 		fmt.Println("\n[ERROR] Nomor aset tidak valid!")
 		return false
 	}
@@ -194,8 +203,12 @@ func validasiIndex(index int) bool {
 }
 
 func simulasiMining() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\n[ERROR] Belum ada aset untuk disimulasikan.")
+		return
+	}
+	if jumlahMiningSessions >= NMAX {
+		fmt.Println("\n[ERROR] Data sesi mining sudah penuh.")
 		return
 	}
 
@@ -236,7 +249,8 @@ func simulasiMining() {
 		EnergyUsed:         energyUsed,
 		ComputingPowerUsed: computingPower,
 	}
-	miningSessions = append(miningSessions, session)
+	miningSessions[jumlahMiningSessions] = session
+	jumlahMiningSessions++
 	masterData[assetIndex].Mined = true
 
 	fmt.Println("\n--- HASIL SIMULASI MINING ---")
@@ -251,8 +265,8 @@ func simulasiMining() {
 func pilihAsetUntukMining() int {
 	input := bacaStringWajib("\nMasukkan nomor atau nama aset yang ingin ditambang: ")
 
-	nomor, err := strconv.Atoi(input)
-	if err == nil {
+	nomor, berhasil := stringKeInt(input)
+	if berhasil {
 		index := nomor - 1
 		if validasiIndex(index) {
 			return index
@@ -296,7 +310,7 @@ func hitungDelayMining(aset CryptoAsset, power float64, algoMultiplier float64) 
 }
 
 func menuCariAset() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\n[ERROR] Belum ada aset untuk dicari.")
 		return
 	}
@@ -304,12 +318,12 @@ func menuCariAset() {
 	fmt.Println("\n--- CARI ASET ---")
 	keyword := bacaStringWajib("Masukkan nama aset: ")
 
-	salinanData := salinData(masterData)
-	insertionSortByName(salinanData)
+	salinanData := salinData(masterData, jumlahAset)
+	insertionSortByName(&salinanData, jumlahAset)
 
 	// Binary search memiliki kompleksitas O(log n), tetapi hanya benar
 	// jika data sudah terurut. Karena itu data disalin lalu diurutkan dulu.
-	index := binarySearch(salinanData, keyword)
+	index := binarySearch(salinanData, jumlahAset, keyword)
 	if index == -1 {
 		fmt.Println("\n[INFO] Aset tidak ditemukan.")
 		return
@@ -322,17 +336,17 @@ func menuCariAset() {
 func sequentialSearch(keyword string) int {
 	// Sequential search mengecek data satu per satu dari awal sampai akhir.
 	// Kompleksitas waktunya O(n) karena pada kasus terburuk semua data dicek.
-	for i, aset := range masterData {
-		if samaTanpaHurufBesarKecil(aset.Name, keyword) {
+	for i := 0; i < jumlahAset; i++ {
+		if samaTanpaHurufBesarKecil(masterData[i].Name, keyword) {
 			return i
 		}
 	}
 	return -1
 }
 
-func binarySearch(data []CryptoAsset, keyword string) int {
+func binarySearch(data [NMAX]CryptoAsset, jumlah int, keyword string) int {
 	kiri := 0
-	kanan := len(data) - 1
+	kanan := jumlah - 1
 	keyword = ubahKeHurufKecil(keyword)
 
 	for kiri <= kanan {
@@ -353,7 +367,7 @@ func binarySearch(data []CryptoAsset, keyword string) int {
 }
 
 func menuUrutkanAset() {
-	if len(masterData) == 0 {
+	if jumlahAset == 0 {
 		fmt.Println("\n[ERROR] Belum ada aset untuk diurutkan.")
 		return
 	}
@@ -366,10 +380,10 @@ func menuUrutkanAset() {
 
 	switch pilihan {
 	case 1:
-		selectionSortByDifficulty(masterData)
+		selectionSortByDifficulty(&masterData, jumlahAset)
 		fmt.Println("\n[SUKSES] Data aset diurutkan berdasarkan difficulty dengan Selection Sort.")
 	case 2:
-		insertionSortByReward(masterData)
+		insertionSortByReward(&masterData, jumlahAset)
 		fmt.Println("\n[SUKSES] Data aset diurutkan berdasarkan reward dengan Insertion Sort.")
 	default:
 		fmt.Println("\n[ERROR] Pilihan pengurutan tidak valid!")
@@ -379,12 +393,12 @@ func menuUrutkanAset() {
 	tampilkanSemuaAset()
 }
 
-func selectionSortByDifficulty(data []CryptoAsset) {
+func selectionSortByDifficulty(data *[NMAX]CryptoAsset, jumlah int) {
 	// Selection sort mencari nilai paling kecil, lalu menukarnya ke posisi awal.
 	// Proses ini diulang untuk setiap posisi. Kompleksitas waktunya O(n^2).
-	for i := 0; i < len(data)-1; i++ {
+	for i := 0; i < jumlah-1; i++ {
 		minIndex := i
-		for j := i + 1; j < len(data); j++ {
+		for j := i + 1; j < jumlah; j++ {
 			if data[j].Difficulty < data[minIndex].Difficulty {
 				minIndex = j
 			}
@@ -393,11 +407,11 @@ func selectionSortByDifficulty(data []CryptoAsset) {
 	}
 }
 
-func insertionSortByReward(data []CryptoAsset) {
+func insertionSortByReward(data *[NMAX]CryptoAsset, jumlah int) {
 	// Insertion sort menyisipkan data ke posisi yang tepat pada bagian kiri
-	// slice yang sudah dianggap terurut. Di sini reward terbesar ditempatkan dulu.
+	// data yang sudah dianggap terurut. Di sini reward terbesar ditempatkan dulu.
 	// Kompleksitas waktunya O(n^2).
-	for i := 1; i < len(data); i++ {
+	for i := 1; i < jumlah; i++ {
 		key := data[i]
 		j := i - 1
 
@@ -409,8 +423,8 @@ func insertionSortByReward(data []CryptoAsset) {
 	}
 }
 
-func insertionSortByName(data []CryptoAsset) {
-	for i := 1; i < len(data); i++ {
+func insertionSortByName(data *[NMAX]CryptoAsset, jumlah int) {
+	for i := 1; i < jumlah; i++ {
 		key := data[i]
 		j := i - 1
 
@@ -422,18 +436,36 @@ func insertionSortByName(data []CryptoAsset) {
 	}
 }
 
-func salinData(data []CryptoAsset) []CryptoAsset {
-	hasil := make([]CryptoAsset, len(data))
-	copy(hasil, data)
+func salinData(data [NMAX]CryptoAsset, jumlah int) [NMAX]CryptoAsset {
+	var hasil [NMAX]CryptoAsset
+	for i := 0; i < jumlah; i++ {
+		hasil[i] = data[i]
+	}
 	return hasil
 }
 
 func bacaString(prompt string) string {
 	fmt.Print(prompt)
-	if !inputScanner.Scan() {
-		return ""
+
+	input := ""
+	for {
+		var karakter rune
+		_, err := fmt.Scanf("%c", &karakter)
+		if err != nil {
+			if input != "" {
+				break
+			}
+			return ""
+		}
+		if karakter == '\n' {
+			break
+		}
+		if karakter != '\r' {
+			input += string(karakter)
+		}
 	}
-	return trimSpasi(inputScanner.Text())
+
+	return trimSpasi(input)
 }
 
 func bacaStringWajib(prompt string) string {
@@ -449,8 +481,8 @@ func bacaStringWajib(prompt string) string {
 func bacaInt(prompt string) int {
 	for {
 		input := bacaStringWajib(prompt)
-		nilai, err := strconv.Atoi(input)
-		if err == nil {
+		nilai, berhasil := stringKeInt(input)
+		if berhasil {
 			return nilai
 		}
 		fmt.Println("[ERROR] Masukkan angka bulat yang valid.")
@@ -460,12 +492,100 @@ func bacaInt(prompt string) int {
 func bacaFloatPositif(prompt string) float64 {
 	for {
 		input := bacaStringWajib(prompt)
-		nilai, err := strconv.ParseFloat(input, 64)
-		if err == nil && nilai > 0 {
+		nilai, berhasil := stringKeFloat(input)
+		if berhasil && nilai > 0 {
 			return nilai
 		}
 		fmt.Println("[ERROR] Masukkan angka lebih dari 0.")
 	}
+}
+
+func stringKeInt(teks string) (int, bool) {
+	teks = trimSpasi(teks)
+	if teks == "" {
+		return 0, false
+	}
+
+	hasil := 0
+	tanda := 1
+	posisi := 0
+
+	if teks[0] == '-' {
+		tanda = -1
+		posisi = 1
+	} else if teks[0] == '+' {
+		posisi = 1
+	}
+
+	if posisi >= len(teks) {
+		return 0, false
+	}
+
+	for posisi < len(teks) {
+		karakter := teks[posisi]
+		if karakter < '0' || karakter > '9' {
+			return 0, false
+		}
+		hasil = hasil*10 + int(karakter-'0')
+		posisi++
+	}
+
+	return hasil * tanda, true
+}
+
+func stringKeFloat(teks string) (float64, bool) {
+	teks = trimSpasi(teks)
+	if teks == "" {
+		return 0, false
+	}
+
+	hasil := 0.0
+	pembagiDesimal := 10.0
+	tanda := 1.0
+	posisi := 0
+	sudahAdaTitik := false
+	adaAngka := false
+
+	if teks[0] == '-' {
+		tanda = -1
+		posisi = 1
+	} else if teks[0] == '+' {
+		posisi = 1
+	}
+
+	if posisi >= len(teks) {
+		return 0, false
+	}
+
+	for posisi < len(teks) {
+		karakter := teks[posisi]
+
+		if karakter == '.' {
+			if sudahAdaTitik {
+				return 0, false
+			}
+			sudahAdaTitik = true
+		} else if karakter >= '0' && karakter <= '9' {
+			adaAngka = true
+			angka := float64(karakter - '0')
+			if sudahAdaTitik {
+				hasil += angka / pembagiDesimal
+				pembagiDesimal *= 10
+			} else {
+				hasil = hasil*10 + angka
+			}
+		} else {
+			return 0, false
+		}
+
+		posisi++
+	}
+
+	if !adaAngka {
+		return 0, false
+	}
+
+	return hasil * tanda, true
 }
 
 func trimSpasi(teks string) string {
@@ -497,18 +617,20 @@ func samaTanpaHurufBesarKecil(teks1 string, teks2 string) bool {
 }
 
 func ubahKeHurufKecil(teks string) string {
-	hasil := []rune(teks)
-	for i, huruf := range hasil {
+	hasil := ""
+	for i := 0; i < len(teks); i++ {
+		huruf := teks[i]
 		if huruf >= 'A' && huruf <= 'Z' {
-			hasil[i] = huruf + 32
+			huruf += 32
 		}
+		hasil += string(huruf)
 	}
-	return string(hasil)
+	return hasil
 }
 
 func tampilkanLaporan() {
 	fmt.Println("\n--- LAPORAN MINING ---")
-	if len(miningSessions) == 0 {
+	if jumlahMiningSessions == 0 {
 		fmt.Println("[INFO] Belum ada sesi mining. Jalankan simulasi mining terlebih dahulu.")
 		return
 	}
@@ -518,7 +640,8 @@ func tampilkanLaporan() {
 	var totalEnergy float64
 	mostProfitable := miningSessions[0]
 
-	for _, session := range miningSessions {
+	for i := 0; i < jumlahMiningSessions; i++ {
+		session := miningSessions[i]
 		totalReward += session.Reward
 		totalDuration += session.Duration
 		totalEnergy += session.EnergyUsed
@@ -528,9 +651,9 @@ func tampilkanLaporan() {
 		}
 	}
 
-	averageDuration := totalDuration / float64(len(miningSessions))
+	averageDuration := totalDuration / float64(jumlahMiningSessions)
 
-	fmt.Printf("Total sesi mining: %d\n", len(miningSessions))
+	fmt.Printf("Total sesi mining: %d\n", jumlahMiningSessions)
 	fmt.Printf("Total estimasi reward: %.6f\n", totalReward)
 	fmt.Printf("Rata-rata durasi mining: %.2f jam\n", averageDuration)
 	fmt.Printf("Total konsumsi energi: %.2f kWh\n", totalEnergy)
